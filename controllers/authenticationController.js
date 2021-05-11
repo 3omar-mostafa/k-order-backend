@@ -5,20 +5,17 @@ const verifyPassword = require("../utils/verifyPassword");
 const signJwt = require("../utils/signJwt");
 const User = require("../models/UserModel");
 const Admin = require("../models/AdminModel");
+const Restaurant = require("../models/RestaurantModel");
 
 const passport = require("passport");
 
-const adminSignupService = async (name, email, password, authority) => {
-	const passwordObject = generatePasswordHashAndSalt(password);
-	const passwordSalt = passwordObject.salt;
-	const passwordHash = passwordObject.hash;
+const adminSignupService = async (name, email, password) => {
+	const passwordHash = await generatePasswordHashAndSalt(password);
 
 	let newAdmin = new Admin({
 		name,
 		email,
-		authority,
-		passwordHash,
-		passwordSalt,
+		password: passwordHash
 	});
 
 	newAdmin = await newAdmin.save();
@@ -33,14 +30,14 @@ module.exports.login = catchAsync(async (req, res, next) => {
 		throw new AppError("Invalid email or password", 401);
 	}
 
-	const isValid = verifyPassword(req.body.password, user.passwordHash, user.passwordSalt);
+	const isValid = await verifyPassword(req.body.password, user.password);
 	if (!isValid) {
 		//Invalid password
 		throw new AppError("Invalid email or password", 401);
 	}
 
 	//Valid email & pass
-	const tokenObject = signJwt(user._id, false);
+	const tokenObject = signJwt(user._id, 'User');
 	const publicUser = user.toPublic();
 	res.status(200).json({
 		status: "success",
@@ -51,28 +48,22 @@ module.exports.login = catchAsync(async (req, res, next) => {
 });
 
 module.exports.signup = catchAsync(async (req, res, next) => {
-	const { name, phoneNumbers, addresses, email, password, isSocialAdmin } = req.body;
+	const { name, phone, address, email, password } = req.body;
 
 	User.validatePassword(password); //If there is an error it would be caught by catchAsync.
-	const passwordObject = generatePasswordHashAndSalt(password);
-	const passwordSalt = passwordObject.salt;
-	const passwordHash = passwordObject.hash;
+	const passwordHash = await generatePasswordHashAndSalt(password);
 
 	let newUser = new User({
 		name,
-		phoneNumbers,
-		addresses,
+		phone,
+		address,
 		email,
-		passwordHash,
-		passwordSalt,
-		created_at: new Date(),
-		passwordLastChangedAt: new Date(),
-		isSocialAdmin
+		password: passwordHash
 	});
 
 	newUser = await newUser.save(); //If there is an error it would be caught by catchAsync.
 
-	const tokenObject = signJwt(newUser._id, false);
+	const tokenObject = signJwt(newUser._id, 'User');
 	const publicUser = newUser.toPublic();
 	res.status(200).json({
 		status: "success",
@@ -89,14 +80,14 @@ module.exports.adminLogin = catchAsync(async (req, res, next) => {
 		throw new AppError("Invalid email or password", 401);
 	}
 
-	const isValid = verifyPassword(req.body.password, admin.passwordHash, admin.passwordSalt);
+	const isValid = await verifyPassword(req.body.password, admin.password);
 	if (!isValid) {
 		//Invalid password
 		throw new AppError("Invalid email or password", 401);
 	}
 
 	//Valid email & pass
-	const tokenObject = signJwt(admin._id, true);
+	const tokenObject = signJwt(admin._id, 'Admin');
 	const publicUser = admin.toPublic();
 	res.status(200).json({
 		status: "success",
@@ -107,12 +98,12 @@ module.exports.adminLogin = catchAsync(async (req, res, next) => {
 });
 
 module.exports.adminSignup = catchAsync(async (req, res, next) => {
-	const { name, email, password, authority } = req.body;
+	const { name, email, password } = req.body;
 
 	Admin.validatePassword(password); //If there is an error it would be caught by catchAsync.
-	 const newAdmin = await adminSignupService(name, email, password, authority)//If there is an error it would be caught by catchAsync.
+	 const newAdmin = await adminSignupService(name, email, password)//If there is an error it would be caught by catchAsync.
 
-	const tokenObject = signJwt(newAdmin._id, true);
+	const tokenObject = signJwt(newAdmin._id, 'Admin');
 	const publicUser = newAdmin.toPublic();
 	res.status(200).json({
 		status: "success",
@@ -133,6 +124,57 @@ module.exports.getAdmins = catchAsync(async (req, res, next) => {
 module.exports.protect = () => {
 	return passport.authenticate("jwt", { session: false });
 };
+
+
+module.exports.restaurantLogin = catchAsync(async (req, res, next) => {
+	const restaurant = await Restaurant.findOne({ email: req.body.email });
+	if (!restaurant) {
+		//Invalid email
+		throw new AppError("Invalid email or password", 401);
+	}
+
+	const isValid = await verifyPassword(req.body.password, restaurant.password);
+	if (!isValid) {
+		//Invalid password
+		throw new AppError("Invalid email or password", 401);
+	}
+
+	//Valid email & pass
+	const tokenObject = signJwt(restaurant._id, 'Restaurant');
+	const publicUser = restaurant.toPublic();
+	res.status(200).json({
+		status: "success",
+		token: tokenObject.token,
+		expiresIn: tokenObject.expires,
+		restaurant: publicUser,
+	});
+});
+
+module.exports.restaurantSignup = catchAsync(async (req, res, next) => {
+	const { name, phones, addresses, email, password } = req.body;
+
+	Restaurant.validatePassword(password); //If there is an error it would be caught by catchAsync.
+	const passwordHash = await generatePasswordHashAndSalt(password);
+
+	let newRestaurant = new Restaurant({
+		name,
+		phones,
+		addresses,
+		email,
+		password: passwordHash
+	});
+
+	newRestaurant = await newRestaurant.save(); //If there is an error it would be caught by catchAsync.
+
+	const tokenObject = signJwt(newRestaurant._id, 'Restaurant');
+	const publicUser = newRestaurant.toPublic();
+	res.status(200).json({
+		status: "success",
+		token: tokenObject.token,
+		expiresIn: tokenObject.expires,
+		restaurant: publicUser,
+	});
+});
 
 module.exports.restrictTo = (...roles) => {
 	return (req, res, next) => {

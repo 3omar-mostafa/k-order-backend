@@ -4,8 +4,10 @@ const fs = require("fs");
 const path = require("path");
 const User = require("../models/UserModel");
 const Admin = require("../models/AdminModel");
+const Restaurant = require("../models/RestaurantModel");
 
-const keyPath = path.join(__dirname, "./keys/publicKey.pem");
+
+const keyPath = path.join(__dirname, "./jwt-keys/publicKey.pem");
 const PUBLIC_KEY = fs.readFileSync(keyPath, "utf8");
 
 const options = {
@@ -20,10 +22,12 @@ module.exports = (passport) => {
 		new JwtStrategy(options, async function (payload, done) {
 			try {
 				let user = null;
-				if (payload.admin) {
+				if (payload.role === 'Admin') {
 					user = await Admin.findOne({ _id: payload.sub });
-				} else {
+				} else if (payload.role === 'User') {
 					user = await User.findOne({ _id: payload.sub });
+				} else if (payload.role === 'Restaurant') {
+					user = await Restaurant.findOne({ _id: payload.sub });
 				}
 				if (user) {
 					// user.role = role;

@@ -1,11 +1,8 @@
-const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 
-module.exports = function generatePassword(password) {
-	const salt = crypto.randomBytes(32).toString("hex");
-	const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
-
-	return {
-		salt,
-		hash,
-	};
+module.exports = async function generatePasswordHashAndSalt(password) {
+	// const salt = crypto.randomBytes(32).toString("hex");
+	// const hash = crypto.pbkdf2Sync(password, salt, 10000, 64, "sha512").toString("hex");
+	const passwordHash = await bcrypt.hash(password, 10000); //Generates a string consists of a hash and a salt
+	return passwordHash;
 };

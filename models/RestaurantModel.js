@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const AppError = require("../utils/appError");
 
-const userSchema = new mongoose.Schema(
+const restaurantSchema = new mongoose.Schema(
 	{
 		name: {
 			type: String,
@@ -26,19 +26,33 @@ const userSchema = new mongoose.Schema(
 				},
 			],
 		},
-		phone: {
-			type: String,
-			required: [true, "Phone must be specified."],
+		phones: {
+			type: [String],
+			required: [true, "Phone array must be specified."],
 			validate: [
 				{
-					validator: (v) => /^(01)[0-9]{9}$/.test(v),
-					message: `Phone number is in the wrong format`,
+					validator: (v) => v.length >= 1 && v.length <= 3,
+					message: `Phone numbers array must contain at least 1 phone number and at most 3 phone numbers`,
+				},
+				{
+					validator: (v) => new Set(v).size === v.length,
+					message: `Phone numbers must not contain duplicates`,
+				},
+				{
+					validator: (v) => v.every((val) => /^(01)[0-9]{9}$/.test(val)),
+					message: `Phone numbers are in the wrong format`,
 				},
 			],
 		},
-		address: {
-			type: String,
-			required: [true, "Address must be specified."],
+		addresses: {
+			type: [String],
+			required: [true, "Addresses array must be specified."],
+			validate: [
+				{
+					validator: (v) => v.length >= 1 && v.length <= 3,
+					message: `Addresses array must contain at least 1 address and at most 3 addresses`,
+				},
+			],
 		},
 		email: {
 			type: String,
@@ -57,7 +71,7 @@ const userSchema = new mongoose.Schema(
 	}
 );
 
-userSchema.statics.validatePassword = (password) => {
+restaurantSchema.statics.validatePassword = (password) => {
 	if (!password) throw new AppError("Password must be specifed.", 400);
 	if (typeof password !== "string") throw new AppError("Password must be string.", 400);
 	if (password.length < 8 || password.length > 50)
@@ -65,14 +79,14 @@ userSchema.statics.validatePassword = (password) => {
 	return true;
 };
 //Returns a select options object for private user
-userSchema.statics.privateUser = () => {
+restaurantSchema.statics.privateUser = () => {
 	return {
 		__v: 0,
 	};
 };
 
 //Returns a select options object for public user
-userSchema.statics.publicUser = () => {
+restaurantSchema.statics.publicUser = () => {
 	return {
 		password: 0,
 		__v: 0,
@@ -80,11 +94,11 @@ userSchema.statics.publicUser = () => {
 };
 
 //Returns an object contains the public user info.
-userSchema.methods.toPublic = function () {
+restaurantSchema.methods.toPublic = function () {
 	const publicUser = this.toObject({
 		virtuals: true,
 	});
-	const fieldsToExclude = userSchema.statics.publicUser();
+	const fieldsToExclude = restaurantSchema.statics.publicUser();
 
 	Object.keys(publicUser).forEach((el) => {
 		if (fieldsToExclude[el] === 0) {
@@ -94,5 +108,5 @@ userSchema.methods.toPublic = function () {
 	return publicUser;
 };
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+const Restaurant = mongoose.model("Restaurant", restaurantSchema);
+module.exports = Restaurant;

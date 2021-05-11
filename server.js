@@ -22,9 +22,7 @@ const connectDB = require("./loaders/connectDB");
 
 	await require("./loaders/initializeDB")();
 
-	
-	//Initialize global variables from DB.
-	await require("./loaders/initializeGlobalData")();
+
 
 	const app = require("./app");
 	let port

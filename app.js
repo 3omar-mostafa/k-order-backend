@@ -16,10 +16,13 @@ const compression = require("compression")
 const errorController = require("./controllers/errorController");
 
 //Routers:-
-const authenticationRouter = require("./routes/authenticationRoutes");
-const userRouter = require("./routes/userRoutes");
-const productRouter = require("./routes/productRoutes");
-const orderRouter = require("./routes/orderRoutes");
+const authenticationRouter = require("./api/routes/authenticationRoutes");
+const userRouter = require("./api/routes/userRoutes");
+// const menuItemRouter = require("./api/routes/menuItemRoutes");
+// const orderRouter = require("./api/routes/orderRoutes");
+const restaurantRouter = require("./api/routes/restaurantRoutes");
+
+
 
 
 
@@ -88,9 +91,18 @@ app.use(express.static(frontendPath));
 const apiUrlBase = `${process.env.API_URL_PREFIX}/v${process.env.API_VERSION}`;
 
 app.use(`${apiUrlBase}/authentication`, authenticationRouter);
+// "/users/:id" --> gets a user
+// "/users/:id/orders" --> gets user orders
 app.use(`${apiUrlBase}/users`, userRouter);
-app.use(`${apiUrlBase}/products`, productRouter);
-app.use(`${apiUrlBase}/orders`, orderRouter);
+// "/restaurants" --> gets all restaurants
+// "/restaurants/:id" --> gets a restaurant
+// "/restaurants/:id/menuItems" --> gets restaurant menu items
+// "/restaurants/:id/reviews" --> gets restaurant reviews
+app.use(`${apiUrlBase}/restaurants`, restaurantRouter); 
+// might be for admins only to get all menuitems for all restaurants for statistics
+// app.use(`${apiUrlBase}/menuItems`, menuItemRouter);
+// might be for admins only to get all orders for all users for statistics
+// app.use(`${apiUrlBase}/orders`, orderRouter);
 
 
 //Setting Content-Security-Policy for images

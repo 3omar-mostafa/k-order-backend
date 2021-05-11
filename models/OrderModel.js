@@ -1,90 +1,28 @@
 const mongoose = require("mongoose");
 const idValidator = require("mongoose-id-validator");
-const orderedProductObject = require("./objects/orderedProductObject");
 const validator = require("validator");
 
 
 const orderSchema = new mongoose.Schema(
 	{
-		code: {
-			type: Number,
-			unique: [true, "Order code must be unique."],
-			required: [true, "Order code must be specified."],
-		},
-		userID: {
+		user: {
 			//if signed up
 			type: mongoose.Schema.ObjectId,
 			ref: "User",
-		},
-		customerName: {
-			type: String,
-			required: [true, "Customer name must be specified,"],
-		},
-		customerPhoneNumbers: {
-			type: [String],
-			required: [true, "Customer phone numbers array must be specified."],
-			validate: [
-				{
-					validator: (v) => v.length >= 1 && v.length <= 3,
-					message: `Phone numbers array must contain at least 1 phone number and at most 3 phone numbers`,
-				},
-				{
-					validator: (v) => new Set(v).size === v.length,
-					message: `Phone numbers must not contain duplicates`,
-				},
-				{
-					validator: (v) => v.every((val) => /^(01)[0-9]{9}$/.test(val)),
-					message: `Phone numbers are in the wrong format`,
-				},
-			],
-		},
-		customerAddress: {
-			type: String,
-			required: [true, "Customer address must be specified."],
 		},
 		date: {
 			type: Date,
 			required: [true, "Date must be specified."],
 		},
-		products: {
-			type: [orderedProductObject],
-			required: [true, "Products must be specified."],
-		},
-		shippingMethod: {
-			type: String,
-			required: [true, "Shipping method field must be specified."],
-			validate: {
-				validator: (v) => Object.keys(SHIPPING_FEES).includes(v),
-				message: `Shipping method must be one of ${Object.keys(SHIPPING_FEES)}`,
-			}
-		},
-		shippingFees: {
+		menuItems: [{
+			type: mongoose.Schema.ObjectId,
+			ref: "MenuItem",
+			required: [true, "Menu items must be specified."],
+		}],
+		totalPrice: {
 			type: Number,
-			required: [true, "Shipping fees field must be specified."]
-		},
-		customerEmail: {
-			type: String,
-			trim: true,
-			validate: [validator.isEmail, "Email is invalid."]
-		},
-		// For Admins
-		seen: {
-			type: Boolean,
-			default: false,
-		},
-		deliveredStatus: {
-			type: String,
-			enum: ["delivered", "undelivered", "in transit", "rejected"],
-			default: false,
-		},
-		designerDone: {
-			type: Boolean,
-			default: false
-		},
-		deleted: {
-			type: Boolean,
-			default: false,
-		},
+			required: [true, "Total price must be specified."]
+		}
 	},
 	{
 		strict: "throw",
