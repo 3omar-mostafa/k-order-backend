@@ -22,7 +22,12 @@ const orderSchema = new mongoose.Schema(
 		totalPrice: {
 			type: Number,
 			required: [true, "Total price must be specified."]
-		}
+		},
+		delivered: {
+			type: Boolean,
+			default: false
+		},
+
 	},
 	{
 		strict: "throw",

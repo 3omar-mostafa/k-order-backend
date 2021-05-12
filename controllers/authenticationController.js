@@ -1,13 +1,23 @@
-const catchAsync = require("./../utils/catchAsync");
-const AppError = require("../utils/appError");
-const generatePasswordHashAndSalt = require("../utils/generatePasswordHashAndSalt");
-const verifyPassword = require("../utils/verifyPassword");
-const signJwt = require("../utils/signJwt");
+const passport = require("passport");
+
+
+
+// Models
 const User = require("../models/UserModel");
 const Admin = require("../models/AdminModel");
 const Restaurant = require("../models/RestaurantModel");
 
-const passport = require("passport");
+// Utils classes
+const AppError = require("../utils/appError");
+
+// Utils services
+const catchAsync = require("./../utils/catchAsync");
+const generatePasswordHashAndSalt = require("../utils/generatePasswordHashAndSalt");
+const verifyPassword = require("../utils/verifyPassword");
+const signJwt = require("../utils/signJwt");
+
+
+
 
 const adminSignupService = async (name, email, password) => {
 	const passwordHash = await generatePasswordHashAndSalt(password);
@@ -125,7 +135,6 @@ module.exports.protect = () => {
 	return passport.authenticate("jwt", { session: false });
 };
 
-
 module.exports.restaurantLogin = catchAsync(async (req, res, next) => {
 	const restaurant = await Restaurant.findOne({ email: req.body.email });
 	if (!restaurant) {
@@ -137,6 +146,10 @@ module.exports.restaurantLogin = catchAsync(async (req, res, next) => {
 	if (!isValid) {
 		//Invalid password
 		throw new AppError("Invalid email or password", 401);
+	}
+
+	if(restaurant.confirmStatus !== 'true'){
+		throw new AppError("Your account is not approved yet. Please try again later.", 401);	
 	}
 
 	//Valid email & pass
@@ -161,19 +174,25 @@ module.exports.restaurantSignup = catchAsync(async (req, res, next) => {
 		phones,
 		addresses,
 		email,
-		password: passwordHash
+		password: passwordHash,
+		confirmStatus: "none"
 	});
 
 	newRestaurant = await newRestaurant.save(); //If there is an error it would be caught by catchAsync.
 
-	const tokenObject = signJwt(newRestaurant._id, 'Restaurant');
-	const publicUser = newRestaurant.toPublic();
 	res.status(200).json({
 		status: "success",
-		token: tokenObject.token,
-		expiresIn: tokenObject.expires,
-		restaurant: publicUser,
+		message: "Your account signup request is sent successfully. Please wait untill the admins review your information and approve it."
 	});
+
+	// const tokenObject = signJwt(newRestaurant._id, 'Restaurant');
+	// const publicUser = newRestaurant.toPublic();
+	// res.status(200).json({
+	// 	status: "success",
+	// 	token: tokenObject.token,
+	// 	expiresIn: tokenObject.expires,
+	// 	restaurant: publicUser,
+	// });
 });
 
 module.exports.restrictTo = (...roles) => {

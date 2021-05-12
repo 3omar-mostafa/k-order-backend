@@ -64,6 +64,11 @@ const restaurantSchema = new mongoose.Schema(
 		password: {
 			type: String,
 			required: [true, "Password is required."],
+		},
+		confirmStatus: {
+			type: String,
+			enum: ["none", "true", "false"],
+			default: "none"
 		}
 	},
 	{

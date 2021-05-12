@@ -14,7 +14,15 @@ const reviewSchema = new mongoose.Schema(
 		},
 		rate: {
 			type: Number,
-			required: [true, "Rate (Number) must be specified."],
+			required: [true, "Rate must be specified."],
+			min: 1,
+			max: 5,
+			validate: [
+				{
+					validator : Number.isInteger,
+    			message   : '{VALUE} is not an integer value'
+				}
+			],
 		},
 		details: {
 			type: String,
