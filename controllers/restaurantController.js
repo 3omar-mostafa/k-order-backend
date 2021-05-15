@@ -7,6 +7,15 @@ const MenuItem = require("../models/MenuItemModel");
 const Review = require("../models/ReviewModel");
 const Order = require("../models/OrderModel");
 
+// Requires that restaurant is confirmed by admin, if not throw an error
+let requireConfirmed = async (restaurantId) => {
+  let restaurant = await Restaurant.findById(restaurantId);
+  if (restaurant.confirmStatus !== "true") {
+    throw new AppError(`Restaurant with id ${restaurantId} is not confirmed`, 400);
+  }
+};
+
+
 // 1. Get current restaurant info
 module.exports.me = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", user: req.user.toPublic() });
@@ -14,7 +23,13 @@ module.exports.me = catchAsync(async (req, res, next) => {
 
 // 2. Get specific restaurant info
 module.exports.getRestaurant = catchAsync(async (req, res, next) => {
-  // TODO
+  let restaurantId = req.params.id;
+  let restaurant = await Restaurant.findById(restaurantId);
+  if (!restaurant) {
+    throw new AppError("Invalid Restaurant Id", 401);
+  }
+  await requireConfirmed(restaurantId);
+  res.status(200).json({ status: "success", restaurant: restaurant.toPublic() });
 });
 
 // 3. Get menu item
@@ -74,5 +89,13 @@ module.exports.getRestaurantsRequests = catchAsync(async (req, res, next) => {
 
 // 13. get all restaurants
 module.exports.getAllRestaurants = catchAsync(async (req, res, next) => {
-  // TODO
+  let queryManager = new DbQueryManager(Restaurant.find({ confirmStatus: "true" }));
+  let restaurants = await queryManager.all(req.query);
+
+  restaurants = restaurants.map((restaurant) => {
+    return restaurant.toPublic();
+  });
+
+  const totalSize = await queryManager.totalCount(req.query, Restaurant, { confirmStatus: "true" });
+  res.status(200).json({ status: "success", totalSize, restaurants });
 });
