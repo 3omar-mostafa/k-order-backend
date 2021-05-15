@@ -12,7 +12,12 @@ module.exports = function signJwt(id, role) {
 		role,
 	};
 
-	const signedToken = jsonwebtoken.sign(payload, PRIVATE_KEY, {
+	const secret = {
+		key: PRIVATE_KEY,
+		passphrase: process.env.JWT_PRIVATE_KEY_PASSPHRASE
+	  };
+	
+  const signedToken = jsonwebtoken.sign(payload, secret, {
 		expiresIn: process.env.JWT_EXPIRES_IN, //Must be in milliseconds,
 		algorithm: "RS256",
 	});
