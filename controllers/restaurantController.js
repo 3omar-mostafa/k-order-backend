@@ -34,31 +34,91 @@ module.exports.getRestaurant = catchAsync(async (req, res, next) => {
 
 // 3. Get menu item
 module.exports.getMenuItem = catchAsync(async (req, res, next) => {
-  // TODO
-	// check that the restaurant's confirmStatus = "true"
+  let restaurantId = req.params.restaurant_id;
+  let menuItemId = req.params.menuItem_id;
+
+  // let menuItem = await MenuItem.findOne({ _id: menuItemId, restaurant: restaurantId });
+  let menuItem = await MenuItem.findById(menuItemId)
+
+  if (!menuItem) {
+    throw new AppError("Not Found", 404);
+  }
+
+  await requireConfirmed(restaurantId);
+  res.status(200).json({ status: "success", menu_item: menuItem });
 });
 
 // 4. Get menu item
 module.exports.getAllMenuItems = catchAsync(async (req, res, next) => {
-  // TODO
-	// check that the restaurant's confirmStatus = "true"
+  let restaurantId = req.params.id;
+  await requireConfirmed(restaurantId);
+
+  let queryManager = new DbQueryManager(MenuItem.find({ restaurant: restaurantId }));
+  let menuItems = await queryManager.all(req.query);
+  const totalSize = await queryManager.totalCount(req.query, MenuItem, { restaurant: restaurantId });
+
+  res.status(200).json({ status: "success", totalSize, menu_items: menuItems });
 });
 
 // 5. Insert menu item
 module.exports.addMenuItem = catchAsync(async (req, res, next) => {
-  // TODO
+  const { name, image, description, ingredients, availableForSale, price } = req.body;
+  let menuItem = new MenuItem({
+    name,
+    restaurant: req.user._id,
+    image,
+    description,
+    ingredients,
+    availableForSale,
+    price
+  });
+  menuItem = await menuItem.save();
+  res.status(201).json({ status: "created", menu_item: menuItem });
 });
 
 // 6. Update menu item (price / name / description)
 module.exports.updateMenuItem = catchAsync(async (req, res, next) => {
-  // You need to check that the menu item belongs to the restaurant sending this request
-  // TODO
+  let menuItemId = req.params.id;
+  let restaurantId = req.user._id;
+  let menuItem = await MenuItem.findById(menuItemId);
+  if (!menuItem) {
+    throw new AppError(`Menu Item with id ${menuItemId} is not found`, 404);
+
+  }
+  if (menuItem.restaurant.toString() !== restaurantId.toString()) {
+    throw new AppError("You don't have permission to update this menu item", 403);
+  }
+
+  // Filter req.body to include only these properties
+  const allowed = ["name", "image", "description", "ingredients", "availableForSale", "price"];
+  const newMenuItem = Object.keys(req.body)
+    .filter(key => allowed.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = req.body[key];
+      return obj;
+    }, {});
+
+
+  await menuItem.updateOne(newMenuItem);
+
+  res.status(200).json({ status: "updated" });
 });
 
 // 7. Delete menu item
 module.exports.deleteMenuItem = catchAsync(async (req, res, next) => {
-  // TODO
-  // You need to check that the menu item belongs to the restaurant sending this request
+  let menuItemId = req.params.id;
+  let restaurantId = req.user._id;
+  let menuItem = await MenuItem.findById(menuItemId);
+  if (!menuItem) {
+    throw new AppError(`Menu Item with id ${menuItemId} is not found`, 404);
+
+  }
+  if (menuItem.restaurant.toString() !== restaurantId.toString()) {
+    throw new AppError("You don't have permission to delete this menu item", 403);
+  }
+
+  await MenuItem.deleteOne({ _id: menuItemId, restaurant: restaurantId });
+  res.status(200).json({ status: "deleted" });
 });
 
 // 8. get incoming orders
