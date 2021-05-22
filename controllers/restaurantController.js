@@ -60,14 +60,13 @@ module.exports.getMenuItem = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.restaurant_id;
   let menuItemId = req.params.menuItem_id;
 
-  // let menuItem = await MenuItem.findOne({ _id: menuItemId, restaurant: restaurantId });
-  let menuItem = await MenuItem.findById(menuItemId)
+  await requireConfirmed(restaurantId);
+  let menuItem = await MenuItem.findOne({ _id: menuItemId, restaurant: restaurantId });
 
   if (!menuItem) {
     throw new AppError("Not Found", 404);
   }
 
-  await requireConfirmed(restaurantId);
   res.status(200).json({ status: "success", menu_item: menuItem });
 });
 
