@@ -1,20 +1,13 @@
 const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
 const DbQueryManager = require("../utils/dbQueryManager");
+const requireConfirmed = require("../utils/requireConfirmedRestaurant"); // Requires that restaurant is confirmed by admin, if not throw an error
+
 
 const Restaurant = require("../models/RestaurantModel");
 const MenuItem = require("../models/MenuItemModel");
 const Review = require("../models/ReviewModel");
 const Order = require("../models/OrderModel");
-
-// Requires that restaurant is confirmed by admin, if not throw an error
-let requireConfirmed = async (restaurantId) => {
-  let restaurant = await Restaurant.findById(restaurantId);
-  if (restaurant.confirmStatus !== "true") {
-    throw new AppError(`Restaurant with id ${restaurantId} is not confirmed`, 400);
-  }
-};
-
 
 // 1. Get current restaurant info
 module.exports.me = catchAsync(async (req, res, next) => {
