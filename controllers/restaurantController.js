@@ -2,6 +2,7 @@ const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
 const DbQueryManager = require("../utils/dbQueryManager");
 const requireConfirmed = require("../utils/requireConfirmedRestaurant"); // Requires that restaurant is confirmed by admin, if not throw an error
+const filterAllowedProperties = require("../utils/filterAllowedProperties"); // Filter object to include only allowed properties
 
 
 const Restaurant = require("../models/RestaurantModel");
@@ -113,13 +114,7 @@ module.exports.updateMenuItem = catchAsync(async (req, res, next) => {
 
   // Filter req.body to include only these properties
   const allowed = ["name", "image", "description", "ingredients", "availableForSale", "price"];
-  const newMenuItem = Object.keys(req.body)
-    .filter(key => allowed.includes(key))
-    .reduce((obj, key) => {
-      obj[key] = req.body[key];
-      return obj;
-    }, {});
-
+  const newMenuItem = filterAllowedProperties(req.body, allowed);
 
   await menuItem.updateOne(newMenuItem);
 

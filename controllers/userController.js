@@ -2,6 +2,7 @@ const catchAsync = require("./../utils/catchAsync");
 const AppError = require("../utils/appError");
 const DbQueryManager = require("../utils/dbQueryManager");
 const requireConfirmedRestaurant = require("../utils/requireConfirmedRestaurant"); // Requires that restaurant is confirmed by admin, if not throw an error
+const filterAllowedProperties = require("../utils/filterAllowedProperties"); // Filter object to include only allowed properties
 
 const User = require("../models/UserModel");
 const Order = require("../models/OrderModel");
@@ -114,14 +115,7 @@ module.exports.updateReview = catchAsync(async (req, res, next) => {
     throw new AppError("You don't have permission to update this review", 403);
   }
 
-  // Filter req.body to include only these properties
-  const allowed = ["rate", "details"];
-  const newReview = Object.keys(req.body)
-    .filter(key => allowed.includes(key))
-    .reduce((obj, key) => {
-      obj[key] = req.body[key];
-      return obj;
-    }, {});
+  const newReview = filterAllowedProperties(req.body, ["rate", "details"]);
 
   await review.updateOne(newReview);
 
