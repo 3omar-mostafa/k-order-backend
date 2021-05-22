@@ -13,6 +13,10 @@ const connectDB = async () => {
 			useFindAndModify: false,
 			useUnifiedTopology: true,
 		});
+
+		// Validate constrains in update methods
+		mongoose.set('runValidators', true);
+
 		logger.log('info', `✅ Database connected successfully ${process.env.NODE_ENV !== "production"?DB:''}`);
 	} catch (err) {
 		logger.log('error', `❌ Error connecting to database     ${err.toString()}`);
