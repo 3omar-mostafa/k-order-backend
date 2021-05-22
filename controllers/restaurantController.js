@@ -21,7 +21,29 @@ module.exports.me = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", user: req.user.toPublic() });
 });
 
-// 2. Get specific restaurant info
+// 2. [Admin] approve/reject restaurant (patch request)
+module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
+  let restaurantId = req.params.id;
+  let restaurant = await Restaurant.findById(restaurantId);
+  if (!restaurant) {
+    throw new AppError("Invalid Restaurant Id", 401);
+  }
+  let confirmStatus = req.body.confirm_status;
+  let acceptedValues = ["true", "false", "none"];
+  if (!acceptedValues.includes(confirmStatus)) {
+    throw new AppError(`Accepted values are : ${acceptedValues}`, 400);
+  }
+  restaurant.confirmStatus = confirmStatus;
+  await restaurant.save();
+  res.status(200).json({ status: "success" });
+});
+
+// 3. [Admin] Get restaurants requests (get all restaurant documents with the field "confirmStatus" = "none" -- note that this field becomes "true" on approval and "false" on rejection)
+module.exports.getRestaurantsRequests = catchAsync(async (req, res, next) => {
+  // TODO
+});
+
+// 4. Get specific restaurant info
 module.exports.getRestaurant = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   let restaurant = await Restaurant.findById(restaurantId);
@@ -32,7 +54,7 @@ module.exports.getRestaurant = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", restaurant: restaurant.toPublic() });
 });
 
-// 3. Get menu item
+// 5. Get menu item
 module.exports.getMenuItem = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.restaurant_id;
   let menuItemId = req.params.menuItem_id;
@@ -48,7 +70,7 @@ module.exports.getMenuItem = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", menu_item: menuItem });
 });
 
-// 4. Get menu item
+// 6. Get menu item
 module.exports.getAllMenuItems = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   await requireConfirmed(restaurantId);
@@ -60,7 +82,7 @@ module.exports.getAllMenuItems = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", totalSize, menu_items: menuItems });
 });
 
-// 5. Insert menu item
+// 7. Insert menu item
 module.exports.addMenuItem = catchAsync(async (req, res, next) => {
   const { name, image, description, ingredients, availableForSale, price } = req.body;
   let menuItem = new MenuItem({
@@ -76,7 +98,7 @@ module.exports.addMenuItem = catchAsync(async (req, res, next) => {
   res.status(201).json({ status: "created", menu_item: menuItem });
 });
 
-// 6. Update menu item (price / name / description)
+// 8. Update menu item (price / name / description)
 module.exports.updateMenuItem = catchAsync(async (req, res, next) => {
   let menuItemId = req.params.id;
   let restaurantId = req.user._id;
@@ -104,7 +126,7 @@ module.exports.updateMenuItem = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "updated" });
 });
 
-// 7. Delete menu item
+// 9. Delete menu item
 module.exports.deleteMenuItem = catchAsync(async (req, res, next) => {
   let menuItemId = req.params.id;
   let restaurantId = req.user._id;
@@ -121,41 +143,19 @@ module.exports.deleteMenuItem = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "deleted" });
 });
 
-// 8. get incoming orders
+// 10. get incoming orders
 module.exports.getMyIncomingOrders = catchAsync(async (req, res, next) => {
   // TODO
 });
 
-// 9. Set delivered status for a specific order
+// 11. Set delivered status for a specific order
 module.exports.changeDeliveredStatus = catchAsync(async (req, res, next) => {
   // TODO
   // You need to check that the order belongs to the restaurant sending this request
 });
 
-// 10. Get reviews of my restaurant
+// 12. Get reviews of my restaurant
 module.exports.getMyIncomingReviews = catchAsync(async (req, res, next) => {
-  // TODO
-});
-
-// 11. Admin approve/reject restaurant (patch request)
-module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
-  let restaurantId = req.params.id;
-  let restaurant = await Restaurant.findById(restaurantId);
-  if (!restaurant) {
-    throw new AppError("Invalid Restaurant Id", 401);
-  }
-  let confirmStatus = req.body.confirm_status;
-  let acceptedValues = ["true", "false", "none"];
-  if (!acceptedValues.includes(confirmStatus)) {
-    throw new AppError(`Accepted values are : ${acceptedValues}`, 400);
-  }
-  restaurant.confirmStatus = confirmStatus;
-  await restaurant.save();
-  res.status(200).json({ status: "success" });
-});
-
-// 12. get restaurants requests (get all restaurant documents with the field "confirmStatus" = "none" -- note that this field becomes "true" on approval and "false" on rejection)
-module.exports.getRestaurantsRequests = catchAsync(async (req, res, next) => {
   // TODO
 });
 
