@@ -36,12 +36,44 @@ router.post(
   userController.addOrder
 );
 
-// 5. Make a review
+// 5. Get all my reviews
+router.get(
+  "/me/reviews",
+  authenticationController.protect(),
+  authenticationController.restrictTo("User"),
+  userController.getAllReviews
+);
+
+// 6. Get specific review
+router.get(
+  "/me/reviews/:id",
+  authenticationController.protect(),
+  authenticationController.restrictTo("User"),
+  userController.getReview
+);
+
+// 7. Create a review
 router.post(
   "/me/reviews",
   authenticationController.protect(),
   authenticationController.restrictTo("User"),
   userController.addReview
+);
+
+// 8. Update a review
+router.patch(
+  "/me/reviews/:id",
+  authenticationController.protect(),
+  authenticationController.restrictTo("User"),
+  userController.updateReview
+);
+
+// 9. Delete a review
+router.delete(
+  "/me/reviews/:id",
+  authenticationController.protect(),
+  authenticationController.restrictTo("User"),
+  userController.deleteReview
 );
 
 module.exports = router;

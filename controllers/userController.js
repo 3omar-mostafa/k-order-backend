@@ -51,8 +51,28 @@ module.exports.addOrder = catchAsync(async (req, res, next) => {
 	// check that the restaurant's confirmStatus = "true"
 });
 
-// 5. Post a review
+// 5. Get all my reviews
+module.exports.getAllReviews = catchAsync(async (req, res, next) => {
+  // TODO
+});
+
+// 6. Get specific review
+module.exports.getReview = catchAsync(async (req, res, next) => {
+  // TODO
+});
+
+// 7. Create a review
 module.exports.addReview = catchAsync(async (req, res, next) => {
   // TODO
 	// check that the restaurant's confirmStatus = "true"
+});
+
+// 8. Update a review
+module.exports.updateReview = catchAsync(async (req, res, next) => {
+  // TODO
+});
+
+// 9. Delete a review
+module.exports.deleteReview = catchAsync(async (req, res, next) => {
+  // TODO
 });
