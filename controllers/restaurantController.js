@@ -139,7 +139,19 @@ module.exports.getMyIncomingReviews = catchAsync(async (req, res, next) => {
 
 // 11. Admin approve/reject restaurant (patch request)
 module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
-  // TODO
+  let restaurantId = req.params.id;
+  let restaurant = await Restaurant.findById(restaurantId);
+  if (!restaurant) {
+    throw new AppError("Invalid Restaurant Id", 401);
+  }
+  let confirmStatus = req.body.confirm_status;
+  let acceptedValues = ["true", "false", "none"];
+  if (!acceptedValues.includes(confirmStatus)) {
+    throw new AppError(`Accepted values are : ${acceptedValues}`, 400);
+  }
+  restaurant.confirmStatus = confirmStatus;
+  await restaurant.save();
+  res.status(200).json({ status: "success" });
 });
 
 // 12. get restaurants requests (get all restaurant documents with the field "confirmStatus" = "none" -- note that this field becomes "true" on approval and "false" on rejection)
