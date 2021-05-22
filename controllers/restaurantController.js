@@ -40,7 +40,15 @@ module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
 
 // 3. [Admin] Get restaurants requests (get all restaurant documents with the field "confirmStatus" = "none" -- note that this field becomes "true" on approval and "false" on rejection)
 module.exports.getRestaurantsRequests = catchAsync(async (req, res, next) => {
-  // TODO
+  let queryManager = new DbQueryManager(Restaurant.find({ confirmStatus: "none" }));
+  let restaurants = await queryManager.all(req.query);
+
+  restaurants = restaurants.map((restaurant) => {
+    return restaurant.toPublic();
+  });
+
+  const totalSize = await queryManager.totalCount(req.query, Restaurant, { confirmStatus: "none" });
+  res.status(200).json({ status: "success", totalSize, restaurants });
 });
 
 // 4. Get specific restaurant info
