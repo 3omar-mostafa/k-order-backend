@@ -61,9 +61,12 @@ module.exports.addOrder = catchAsync(async (req, res, next) => {
     restaurantIds.add(menuItem.restaurant.toString());
   }
 
-  for (let restaurantId of restaurantIds) {
-    await requireConfirmedRestaurant(restaurantId);
+  if (restaurantIds.size > 1) {
+    throw new AppError("Order Items must be of the same restaurant", 400);
   }
+
+  let restaurantId = menuItems[0].restaurant;
+  await requireConfirmedRestaurant(restaurantId);
 
   let totalPrice = 0;
   for (let i = 0; i < menuItems.length; i++) {
@@ -72,6 +75,7 @@ module.exports.addOrder = catchAsync(async (req, res, next) => {
 
   let order = new Order({
     user: userId,
+    restaurant: restaurantId,
     menuItems: req.body,
     totalPrice
   });

@@ -10,6 +10,10 @@ const orderSchema = new mongoose.Schema(
 			type: mongoose.Schema.ObjectId,
 			ref: "User",
 		},
+		restaurant: {
+			type: mongoose.Schema.ObjectId,
+			ref: "Restaurant",
+		},
 		date: {
 			type: Date,
 			required: [true, "Date must be specified."],
