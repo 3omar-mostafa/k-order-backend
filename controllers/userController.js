@@ -16,16 +16,16 @@ module.exports.me = catchAsync(async (req, res, next) => {
 
 // 2. get my orders
 module.exports.myOrders = catchAsync(async (req, res, next) => {
-  const ordersQueryManager = new DbQueryManager(Order.find({ userID: req.user._id }));
-  const myOrders = await ordersQueryManager.all(req.query);
-  const totalSize = await ordersQueryManager.totalCount(req.query, Order, {
-    userID: req.user._id,
-    deleted: { $ne: false },
+  const ordersQueryManager = new DbQueryManager(Order.find({ user: req.user._id }));
+  let myOrders = await ordersQueryManager.all(req.query);
+  const totalSize = await ordersQueryManager.totalCount(req.query, Order, { user: req.user._id });
+
+  myOrders = myOrders.map((order) => {
+    return order.toPublic();
   });
 
   res.status(200).json({
     status: "success",
-    size: myOrders.length,
     totalSize,
     orders: myOrders,
   });
@@ -33,17 +33,17 @@ module.exports.myOrders = catchAsync(async (req, res, next) => {
 
 // 3. get a user orders (for admin if needed)
 module.exports.getUserOrders = catchAsync(async (req, res, next) => {
-  const ordersQueryManager = new DbQueryManager(Order.find({ userID: req.params.id }));
-  const userOrders = await ordersQueryManager.all(req.query);
+  const ordersQueryManager = new DbQueryManager(Order.find({ user: req.params.id }));
+  let userOrders = await ordersQueryManager.all(req.query);
 
-  const totalSize = await ordersQueryManager.totalCount(req.query, Order, {
-    userID: req.params.id,
-    deleted: { $ne: false },
+  const totalSize = await ordersQueryManager.totalCount(req.query, Order, { user: req.params.id });
+
+  userOrders = userOrders.map((order) => {
+    return order.toPublic();
   });
 
   res.status(200).json({
     status: "success",
-    size: userOrders.length,
     totalSize,
     orders: userOrders,
   });
