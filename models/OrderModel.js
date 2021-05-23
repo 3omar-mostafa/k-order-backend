@@ -39,6 +39,7 @@ const orderSchema = new mongoose.Schema(
 		},
 		delivered: {
 			type: Boolean,
+			required: [true, "Delivered status is required"],
 			default: false
 		},
 

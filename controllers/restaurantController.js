@@ -140,13 +140,40 @@ module.exports.deleteMenuItem = catchAsync(async (req, res, next) => {
 
 // 10. get incoming orders
 module.exports.getMyIncomingOrders = catchAsync(async (req, res, next) => {
-  // TODO
+  const ordersQueryManager = new DbQueryManager(Order.find({ restaurant: req.user._id }));
+  let myOrders = await ordersQueryManager.all(req.query);
+  const totalSize = await ordersQueryManager.totalCount(req.query, Order, { restaurant: req.user._id });
+
+  myOrders = myOrders.map((order) => {
+    return order.toPublic();
+  });
+
+  res.status(200).json({
+    status: "success",
+    totalSize,
+    orders: myOrders,
+  });
 });
 
 // 11. Set delivered status for a specific order
 module.exports.changeDeliveredStatus = catchAsync(async (req, res, next) => {
-  // TODO
-  // You need to check that the order belongs to the restaurant sending this request
+  let restaurantId = req.user._id;
+  let orderId = req.params.id;
+
+  let order = await Order.findById(orderId);
+
+  if (!order) {
+    throw new AppError(`Order with id ${orderId} is not found`, 404);
+  }
+
+  if (order.restaurant.toString() !== restaurantId.toString()) {
+    throw new AppError("You don't have permission to update this order", 403);
+  }
+
+  order.delivered = req.body.delivered;
+  await order.save();
+
+  res.status(200).json({ status: "updated" });
 });
 
 // 12. Get reviews of my restaurant
