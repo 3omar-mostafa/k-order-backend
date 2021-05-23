@@ -10,6 +10,7 @@ const hpp = require("hpp");
 const passport = require("passport");
 const path = require("path");
 const compression = require("compression");
+const cors = require("cors");
 
 //Controllers:-
 const errorController = require("./controllers/errorController");
@@ -24,7 +25,7 @@ const statisticsRouter = require("./api/routes/statisticsRoutes");
 //Globals:-
 //-----------------------------------------------------------------
 const app = express();
-
+app.use(cors());
 //Middlewares:-
 //-----------------------------------------------------------------
 //Limit requests ( 1] max: limits 1000 requests for each IP in one hour. | 2] windowMs: If the IP exceeds this limit then it would have to wait for an hour to pass. )
