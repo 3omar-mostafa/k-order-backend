@@ -124,7 +124,7 @@ module.exports.updateReview = catchAsync(async (req, res, next) => {
 
   const newReview = filterAllowedProperties(req.body, ["rate", "details"]);
 
-  await review.updateOne(newReview);
+  await Review.findByIdAndUpdate(reviewId, newReview);
 
   res.status(200).json({ status: "updated" });
 });

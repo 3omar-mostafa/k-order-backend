@@ -69,6 +69,12 @@ const restaurantSchema = new mongoose.Schema(
 			type: String,
 			enum: ["none", "true", "false"],
 			default: "none"
+		},
+		rating: {
+			type: Number,
+			default: 0,
+			min: 0,
+			max: 5
 		}
 	},
 	{
