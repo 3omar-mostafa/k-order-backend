@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const AppError = require("../utils/appError");
 
-const reviewSchema = new mongoose.Schema(
+let reviewSchema = new mongoose.Schema(
 	{
 		user: {
 			type: mongoose.Schema.ObjectId,
@@ -33,6 +33,10 @@ const reviewSchema = new mongoose.Schema(
 		strict: "throw",
 	}
 );
+
+// User can review a restaurant only once, this ensures uniqueness of this combination
+reviewSchema.index({ "user": 1, "restaurant": 1}, { "unique": true });
+
 
 const Review = mongoose.model("Review", reviewSchema);
 module.exports = Review;

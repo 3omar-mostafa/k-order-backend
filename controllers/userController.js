@@ -96,7 +96,14 @@ module.exports.addReview = catchAsync(async (req, res, next) => {
     details
   });
 
-  review = await review.save();
+  try {
+    review = await review.save();
+  } catch (e) {
+    if (e.message.search("duplicate key error") !== -1) {
+      throw new AppError("You have already submitted a review for this restaurant", 400);
+    }
+    throw e;
+  }
   res.status(201).json({ status: "created", review });
 });
 
