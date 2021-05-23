@@ -5,6 +5,7 @@ const requireConfirmedRestaurant = require("../utils/requireConfirmedRestaurant"
 const filterAllowedProperties = require("../utils/filterAllowedProperties"); // Filter object to include only allowed properties
 
 const User = require("../models/UserModel");
+const MenuItem = require("../models/MenuItemModel");
 const Order = require("../models/OrderModel");
 const Review = require("../models/ReviewModel");
 
@@ -50,8 +51,33 @@ module.exports.getUserOrders = catchAsync(async (req, res, next) => {
 
 // 4. Post an order
 module.exports.addOrder = catchAsync(async (req, res, next) => {
-  // TODO
-	// check that the restaurant's confirmStatus = "true"
+  let userId = req.user._id;
+  let quantities = req.body.map(obj => obj.quantity);
+  let menuItemIds = req.body.map(obj => obj.menuItem);
+  let menuItems = await MenuItem.find({ '_id': { $in: menuItemIds } });
+
+  let restaurantIds = new Set();
+  for (let menuItem of menuItems) {
+    restaurantIds.add(menuItem.restaurant.toString());
+  }
+
+  for (let restaurantId of restaurantIds) {
+    await requireConfirmedRestaurant(restaurantId);
+  }
+
+  let totalPrice = 0;
+  for (let i = 0; i < menuItems.length; i++) {
+    totalPrice += menuItems[i].price * quantities[i];
+  }
+
+  let order = new Order({
+    user: userId,
+    menuItems: req.body,
+    totalPrice
+  });
+
+  order = await order.save();
+  res.status(201).json({ status: "created", order: order.toPublic() });
 });
 
 // 5. Get all my reviews
