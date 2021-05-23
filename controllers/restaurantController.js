@@ -151,10 +151,25 @@ module.exports.changeDeliveredStatus = catchAsync(async (req, res, next) => {
 
 // 12. Get reviews of my restaurant
 module.exports.getMyIncomingReviews = catchAsync(async (req, res, next) => {
-  // TODO
+  let restaurantId = req.user._id;
+  let queryManager = new DbQueryManager(Review.find({ restaurant: restaurantId }));
+  let reviews = await queryManager.all(req.query);
+
+  const totalSize = await queryManager.totalCount(req.query, Review, { restaurant: restaurantId });
+  res.status(200).json({ status: "success", totalSize, reviews });
 });
 
-// 13. get all restaurants
+// 13. Get reviews of specific restaurant
+module.exports.getRestaurantReviews = catchAsync(async (req, res, next) => {
+  let restaurantId = req.params.id;
+  let queryManager = new DbQueryManager(Review.find({ restaurant: restaurantId }));
+  let reviews = await queryManager.all(req.query);
+
+  const totalSize = await queryManager.totalCount(req.query, Review, { restaurant: restaurantId });
+  res.status(200).json({ status: "success", totalSize, reviews });
+});
+
+// 14. get all restaurants
 module.exports.getAllRestaurants = catchAsync(async (req, res, next) => {
   let queryManager = new DbQueryManager(Restaurant.find({ confirmStatus: "true" }));
   let restaurants = await queryManager.all(req.query);

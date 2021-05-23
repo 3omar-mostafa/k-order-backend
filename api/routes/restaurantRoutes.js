@@ -86,7 +86,10 @@ router.get(
   restaurantController.getMyIncomingReviews
 );
 
-// 13. get all restaurants
+// 13. Get specific restaurant reviews
+router.get("/:id/reviews", restaurantController.getRestaurantReviews);
+
+// 14. get all restaurants
 router.get("/", restaurantController.getAllRestaurants);
 
 module.exports = router;
