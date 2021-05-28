@@ -56,7 +56,7 @@ module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
   if (!restaurant) {
     throw new AppError("Invalid Restaurant Id", 401);
   }
-  let confirmStatus = req.body.confirm_status;
+  let confirmStatus = String(req.body.confirm_status);
   let acceptedValues = ["true", "false", "none"];
   if (!acceptedValues.includes(confirmStatus)) {
     throw new AppError(`Accepted values are : ${acceptedValues}`, 400);
