@@ -28,6 +28,14 @@ router.patch(
   restaurantController.setConfirmStatus
 );
 
+// [Admin] approve/reject multiple restaurants (patch request)
+router.patch(
+  "/confirm-status",
+  authenticationController.protect(),
+  authenticationController.restrictTo("Admin"),
+  restaurantController.setConfirmStatusMultiple
+);
+
 // 3. [Admin] Get restaurants requests (get all restaurant documents with the field "confirmStatus" = "none" -- note that this field becomes "true" on approval and "false" on rejection)
 // NOTE: This route must be before /:id route because it considers 'requests' as an id
 router.get(

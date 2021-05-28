@@ -27,6 +27,28 @@ module.exports.deleteRestaurant = catchAsync(async (req, res, next) => {
 });
 
 
+// [Admin] approve/reject multiple restaurants (patch request)
+module.exports.setConfirmStatusMultiple = catchAsync(async (req, res, next) => {
+  let restaurantIds = req.body.map(obj => obj.id);
+  let confirmStatuses = req.body.map(obj => obj.confirm_status);
+  let restaurants = await Restaurant.find({ '_id': { $in: restaurantIds } });
+
+  // TODO: Check if any of the ids is invalid
+
+  for (let i = 0; i < restaurants.length; i++) {
+    let restaurant = restaurants[i];
+    let confirmStatus = String(confirmStatuses[i]);
+    let acceptedValues = ["true", "false", "none"];
+    if (!acceptedValues.includes(confirmStatus)) {
+      throw new AppError(`Accepted values are : ${acceptedValues}`, 400);
+    }
+    restaurant.confirmStatus = confirmStatus;
+    await restaurant.save();
+  }
+
+  res.status(200).json({ status: "success" });
+});
+
 // 2. [Admin] approve/reject restaurant (patch request)
 module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
