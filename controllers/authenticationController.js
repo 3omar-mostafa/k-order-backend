@@ -164,15 +164,14 @@ module.exports.restaurantLogin = catchAsync(async (req, res, next) => {
 });
 
 module.exports.restaurantSignup = catchAsync(async (req, res, next) => {
-	const { name, phones, addresses, email, password } = req.body;
+	const { name, branches, email, password } = req.body;
 
 	Restaurant.validatePassword(password); //If there is an error it would be caught by catchAsync.
 	const passwordHash = await generatePasswordHashAndSalt(password);
 
 	let newRestaurant = new Restaurant({
 		name,
-		phones,
-		addresses,
+		branches,
 		email,
 		password: passwordHash,
 		confirmStatus: "none"

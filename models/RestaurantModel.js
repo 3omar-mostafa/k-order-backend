@@ -26,34 +26,24 @@ const restaurantSchema = new mongoose.Schema(
 				},
 			],
 		},
-		phones: {
-			type: [String],
-			required: [true, "Phone array must be specified."],
-			validate: [
-				{
-					validator: (v) => v.length >= 1 && v.length <= 3,
-					message: `Phone numbers array must contain at least 1 phone number and at most 3 phone numbers`,
-				},
-				{
-					validator: (v) => new Set(v).size === v.length,
-					message: `Phone numbers must not contain duplicates`,
-				},
-				{
-					validator: (v) => v.every((val) => /^(01)[0-9]{9}$/.test(val)),
-					message: `Phone numbers are in the wrong format`,
-				},
-			],
-		},
-		addresses: {
-			type: [String],
-			required: [true, "Addresses array must be specified."],
-			validate: [
-				{
-					validator: (v) => v.length >= 1 && v.length <= 3,
-					message: `Addresses array must contain at least 1 address and at most 3 addresses`,
-				},
-			],
-		},
+		branches: [{
+			id: false,
+			_id: false,
+			phone: {
+				type: String,
+				required: [true, "Phone must be specified."],
+				validate: [
+					{
+						validator: (v) => /^(01)[0-9]{9}$/.test(v),
+						message: `Phone number is in the wrong format`,
+					},
+				],
+			},
+			address: {
+				type: String,
+				required: [true, "Address must be specified."],
+			}
+		}],
 		email: {
 			type: String,
 			unique: true,
