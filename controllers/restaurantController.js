@@ -15,6 +15,18 @@ module.exports.me = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", user: req.user.toPublic() });
 });
 
+// [Admin] delete restaurant
+module.exports.deleteRestaurant = catchAsync(async (req, res, next) => {
+  let restaurantId = req.params.id;
+  let restaurant = await Restaurant.findById(restaurantId);
+  if (!restaurant) {
+    throw new AppError("Invalid Restaurant Id", 401);
+  }
+  await restaurant.delete();
+  res.status(200).json({ status: "deleted" });
+});
+
+
 // 2. [Admin] approve/reject restaurant (patch request)
 module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;

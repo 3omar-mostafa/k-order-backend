@@ -12,6 +12,14 @@ router.get(
   restaurantController.me
 );
 
+// [Admin] delete restaurant
+router.delete(
+  "/:id/",
+  authenticationController.protect(),
+  authenticationController.restrictTo("Admin"),
+  restaurantController.deleteRestaurant
+);
+
 // 2. [Admin] approve/reject restaurant (patch request)
 router.patch(
   "/:id/confirm-status",
