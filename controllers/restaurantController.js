@@ -33,7 +33,16 @@ module.exports.setConfirmStatusMultiple = catchAsync(async (req, res, next) => {
   let confirmStatuses = req.body.map(obj => obj.confirm_status);
   let restaurants = await Restaurant.find({ '_id': { $in: restaurantIds } });
 
-  // TODO: Check if any of the ids is invalid
+  // Check if any of the ids is invalid
+  if (restaurants.length !== restaurantIds.length) {
+    let actualRestaurantIds = restaurants.map(obj => obj._id);
+    let invalidIds = restaurantIds.filter(id => !actualRestaurantIds.includes(id));
+    throw new AppError(`These ids are invalid : [${invalidIds}]`, 400);
+  }
+
+  if (confirmStatuses.length !== restaurantIds.length) {
+    throw new AppError("Some ids does not have confirm_status", 400);
+  }
 
   for (let i = 0; i < restaurants.length; i++) {
     let restaurant = restaurants[i];
