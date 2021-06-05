@@ -27,6 +27,28 @@ module.exports.deleteRestaurant = catchAsync(async (req, res, next) => {
 });
 
 
+// [Admin] delete multiple restaurants
+module.exports.deleteMultipleRestaurants = catchAsync(async (req, res, next) => {
+  let restaurantIds = req.body.ids;
+  if (!restaurantIds || restaurantIds.length === 0) {
+    throw new AppError("ids can not be empty", 400);
+  }
+
+  let restaurants = await Restaurant.find({ '_id': { $in: restaurantIds } });
+
+  // Check if any of the ids is invalid
+  if (restaurants.length !== restaurantIds.length) {
+    let actualRestaurantIds = restaurants.map(obj => obj._id);
+    let invalidIds = restaurantIds.filter(id => !actualRestaurantIds.includes(id));
+    throw new AppError(`These ids are invalid : [${invalidIds}]`, 400);
+  }
+
+  await Restaurant.deleteMany({ '_id': { $in: restaurantIds } });
+
+  res.status(200).json({ status: "deleted" });
+});
+
+
 // [Admin] approve/reject multiple restaurants (patch request)
 module.exports.setConfirmStatusMultiple = catchAsync(async (req, res, next) => {
   let restaurantIds = req.body.map(obj => obj.id);

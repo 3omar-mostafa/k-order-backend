@@ -20,6 +20,14 @@ router.delete(
   restaurantController.deleteRestaurant
 );
 
+// [Admin] delete multiple restaurants
+router.delete(
+  "/",
+  authenticationController.protect(),
+  authenticationController.restrictTo("Admin"),
+  restaurantController.deleteMultipleRestaurants
+);
+
 // 2. [Admin] approve/reject restaurant (patch request)
 router.patch(
   "/:id/confirm-status",
