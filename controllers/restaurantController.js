@@ -10,6 +10,13 @@ const MenuItem = require("../models/MenuItemModel");
 const Review = require("../models/ReviewModel");
 const Order = require("../models/OrderModel");
 
+// Cascade Deleting of documents related to the restaurants being deleted
+let cascadeRestaurantsDelete = async (restaurantIds) => {
+  await Review.deleteMany({ restaurant: { $in: restaurantIds } });
+  await Order.deleteMany({ restaurant: { $in: restaurantIds } });
+  await MenuItem.deleteMany({ restaurant: { $in: restaurantIds } });
+};
+
 // 1. Get current restaurant info
 module.exports.me = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", user: req.user.toPublic() });
@@ -22,6 +29,7 @@ module.exports.deleteRestaurant = catchAsync(async (req, res, next) => {
   if (!restaurant) {
     throw new AppError("Invalid Restaurant Id", 401);
   }
+  await cascadeRestaurantsDelete([restaurantId]);
   await restaurant.delete();
   res.status(200).json({ status: "deleted" });
 });
@@ -43,6 +51,7 @@ module.exports.deleteMultipleRestaurants = catchAsync(async (req, res, next) => 
     throw new AppError(`These ids are invalid : [${invalidIds}]`, 400);
   }
 
+  await cascadeRestaurantsDelete(restaurantIds);
   await Restaurant.deleteMany({ '_id': { $in: restaurantIds } });
 
   res.status(200).json({ status: "deleted" });
