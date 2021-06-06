@@ -81,6 +81,12 @@ module.exports.addOrder = catchAsync(async (req, res, next) => {
   });
 
   order = await order.save();
+
+  // populate menu items objects
+  order.menuItems = quantities.map(function (q, i) {
+    return { quantity: q, menuItem: menuItems[i] }
+  });
+  
   res.status(201).json({ status: "created", order: order.toPublic() });
 });
 
