@@ -163,9 +163,10 @@ module.exports.getMenuItem = catchAsync(async (req, res, next) => {
 module.exports.getAllMenuItemsOfMe = catchAsync(async (req, res, next) => {
   let restaurantId = req.user._id;
 
-  let queryManager = new DbQueryManager(MenuItem.find({ restaurant: restaurantId }));
+  let query = { restaurant: restaurantId };
+  let queryManager = new DbQueryManager(MenuItem.find(query));
   let menuItems = await queryManager.all(req.query);
-  const totalSize = await queryManager.totalCount(req.query, MenuItem, { restaurant: restaurantId });
+  const totalSize = await queryManager.totalCount(req.query, MenuItem, query);
 
   res.status(200).json({ status: "success", totalSize, menu_items: menuItems });
 });
@@ -175,12 +176,10 @@ module.exports.getAllMenuItems = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   await requireConfirmed(restaurantId);
 
-  let queryManager = new DbQueryManager(MenuItem.find({ restaurant: restaurantId, availableForSale: true }));
+  let query = { restaurant: restaurantId, availableForSale: true };
+  let queryManager = new DbQueryManager(MenuItem.find(query));
   let menuItems = await queryManager.all(req.query);
-  const totalSize = await queryManager.totalCount(req.query, MenuItem, {
-    restaurant: restaurantId,
-    availableForSale: true
-  });
+  const totalSize = await queryManager.totalCount(req.query, MenuItem, query);
 
   res.status(200).json({ status: "success", totalSize, menu_items: menuItems });
 });
@@ -242,9 +241,10 @@ module.exports.deleteMenuItem = catchAsync(async (req, res, next) => {
 
 // 10. get incoming orders
 module.exports.getMyIncomingOrders = catchAsync(async (req, res, next) => {
-  const ordersQueryManager = new DbQueryManager(Order.find({ restaurant: req.user._id }).populate('menuItems.menuItem'));
+  let query = { restaurant: req.user._id };
+  const ordersQueryManager = new DbQueryManager(Order.find(query).populate('menuItems.menuItem'));
   let myOrders = await ordersQueryManager.all(req.query);
-  const totalSize = await ordersQueryManager.totalCount(req.query, Order, { restaurant: req.user._id });
+  const totalSize = await ordersQueryManager.totalCount(req.query, Order, query);
 
   myOrders = myOrders.map((order) => {
     return order.toPublic();
@@ -281,32 +281,35 @@ module.exports.changeDeliveredStatus = catchAsync(async (req, res, next) => {
 // 12. Get reviews of my restaurant
 module.exports.getMyIncomingReviews = catchAsync(async (req, res, next) => {
   let restaurantId = req.user._id;
-  let queryManager = new DbQueryManager(Review.find({ restaurant: restaurantId }));
+  let query = { restaurant: restaurantId };
+  let queryManager = new DbQueryManager(Review.find(query));
   let reviews = await queryManager.all(req.query);
 
-  const totalSize = await queryManager.totalCount(req.query, Review, { restaurant: restaurantId });
+  const totalSize = await queryManager.totalCount(req.query, Review, query);
   res.status(200).json({ status: "success", totalSize, reviews });
 });
 
 // 13. Get reviews of specific restaurant
 module.exports.getRestaurantReviews = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
-  let queryManager = new DbQueryManager(Review.find({ restaurant: restaurantId }));
+  let query = { restaurant: restaurantId };
+  let queryManager = new DbQueryManager(Review.find(query));
   let reviews = await queryManager.all(req.query);
 
-  const totalSize = await queryManager.totalCount(req.query, Review, { restaurant: restaurantId });
+  const totalSize = await queryManager.totalCount(req.query, Review, query);
   res.status(200).json({ status: "success", totalSize, reviews });
 });
 
 // 14. get all restaurants
 module.exports.getAllRestaurants = catchAsync(async (req, res, next) => {
-  let queryManager = new DbQueryManager(Restaurant.find({ confirmStatus: "true" }));
+  let query = { confirmStatus: "true" };
+  let queryManager = new DbQueryManager(Restaurant.find(query));
   let restaurants = await queryManager.all(req.query);
 
   restaurants = restaurants.map((restaurant) => {
     return restaurant.toPublic();
   });
 
-  const totalSize = await queryManager.totalCount(req.query, Restaurant, { confirmStatus: "true" });
+  const totalSize = await queryManager.totalCount(req.query, Restaurant, query);
   res.status(200).json({ status: "success", totalSize, restaurants });
 });

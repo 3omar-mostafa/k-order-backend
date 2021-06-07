@@ -1,7 +1,5 @@
 const passport = require("passport");
 
-
-
 // Models
 const User = require("../models/UserModel");
 const Admin = require("../models/AdminModel");
@@ -15,8 +13,6 @@ const catchAsync = require("./../utils/catchAsync");
 const generatePasswordHashAndSalt = require("../utils/generatePasswordHashAndSalt");
 const verifyPassword = require("../utils/verifyPassword");
 const signJwt = require("../utils/signJwt");
-
-
 
 
 const adminSignupService = async (name, email, password) => {
@@ -184,14 +180,6 @@ module.exports.restaurantSignup = catchAsync(async (req, res, next) => {
 		message: "Your account signup request is sent successfully. Please wait untill the admins review your information and approve it."
 	});
 
-	// const tokenObject = signJwt(newRestaurant._id, 'Restaurant');
-	// const publicUser = newRestaurant.toPublic();
-	// res.status(200).json({
-	// 	status: "success",
-	// 	token: tokenObject.token,
-	// 	expiresIn: tokenObject.expires,
-	// 	restaurant: publicUser,
-	// });
 });
 
 module.exports.restrictTo = (...roles) => {
@@ -210,20 +198,3 @@ module.exports.restrictTo = (...roles) => {
 		}
 	};
 };
-
-// module.exports.authorize = (...authorities) => {
-// 	return (req, res, next) => {
-
-// 		const myAuthority = req.user.authority;
-// 		if(!authorities.includes(myAuthority))
-// 		return next(
-// 			new AppError(
-// 				`You are unauthorized. This route is restricted to certain type of users.`,
-// 				401
-// 			)
-// 		);
-// 		else {
-// 			return next();
-// 		}
-// 	};
-// };

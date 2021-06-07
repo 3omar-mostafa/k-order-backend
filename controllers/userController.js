@@ -16,9 +16,10 @@ module.exports.me = catchAsync(async (req, res, next) => {
 
 // 2. get my orders
 module.exports.myOrders = catchAsync(async (req, res, next) => {
-  const ordersQueryManager = new DbQueryManager(Order.find({ user: req.user._id }));
+  let query = { user: req.user._id };
+  const ordersQueryManager = new DbQueryManager(Order.find(query));
   let myOrders = await ordersQueryManager.all(req.query);
-  const totalSize = await ordersQueryManager.totalCount(req.query, Order, { user: req.user._id });
+  const totalSize = await ordersQueryManager.totalCount(req.query, Order, query);
 
   myOrders = myOrders.map((order) => {
     return order.toPublic();
@@ -33,10 +34,11 @@ module.exports.myOrders = catchAsync(async (req, res, next) => {
 
 // 3. get a user orders (for admin if needed)
 module.exports.getUserOrders = catchAsync(async (req, res, next) => {
-  const ordersQueryManager = new DbQueryManager(Order.find({ user: req.params.id }));
+  let query = { user: req.params.id };
+  const ordersQueryManager = new DbQueryManager(Order.find(query));
   let userOrders = await ordersQueryManager.all(req.query);
 
-  const totalSize = await ordersQueryManager.totalCount(req.query, Order, { user: req.params.id });
+  const totalSize = await ordersQueryManager.totalCount(req.query, Order, query);
 
   userOrders = userOrders.map((order) => {
     return order.toPublic();
@@ -98,10 +100,11 @@ module.exports.addOrder = catchAsync(async (req, res, next) => {
 // 5. Get all my reviews
 module.exports.getAllReviews = catchAsync(async (req, res, next) => {
   let userId = req.user._id;
-  let queryManager = new DbQueryManager(Review.find({ user: userId }));
+  let query = { user: userId };
+  let queryManager = new DbQueryManager(Review.find(query));
   let reviews = await queryManager.all(req.query);
 
-  const totalSize = await queryManager.totalCount(req.query, Review, { user: userId });
+  const totalSize = await queryManager.totalCount(req.query, Review, query);
   res.status(200).json({ status: "success", totalSize, reviews });
 });
 

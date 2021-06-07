@@ -97,10 +97,7 @@ module.exports = (err, req, res, next) => {
 		else if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
 		else if (error.type === "entity.parse.failed" && error.message.includes("in JSON at position"))
 			error = handleBodyParserError(error);
-		// else if(error.errors)
-		// {
-		//     error.errors.model
-		// }
+
 		sendErrorProd(error, req, res);
 	}
 };

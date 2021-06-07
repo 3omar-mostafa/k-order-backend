@@ -55,27 +55,6 @@ orderSchema.plugin(idValidator, {
 	message: "Bad ID value for {PATH}",
 });
 
-orderSchema.pre(/^find/, function (next) {
-	this.find({
-		deleted: {
-			$ne: true,
-		},
-	});
-	next();
-});
-orderSchema.pre(/^find/, function (next) {
-	this.populate({ path: 'products.generalProduct', select: 'productName productName_Ar' });
-	next();
-});
-orderSchema.pre("countDocuments", function (next) {
-	this.find({
-		deleted: {
-			$ne: true,
-		},
-	});
-	next();
-});
-
 //Returns a select options object for public user
 orderSchema.statics.publicOrder = () => {
 	return {

@@ -38,22 +38,5 @@ const productSchema = new mongoose.Schema(
 	}
 );
 
-productSchema.pre("count", function (next) {
-	this.find({
-		deleted: {
-			$ne: true,
-		},
-	});
-	next();
-});
-
-// productSchema.pre("findOne", function (next) {
-// 	this.find({
-// 		availableForSale: {
-// 			$ne: false,
-// 		},
-// 	});
-// 	next();
-// });
 const Product = mongoose.model("Product", productSchema);
 module.exports = Product;
