@@ -22,7 +22,7 @@ module.exports.me = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", user: req.user.toPublic() });
 });
 
-// [Admin] delete restaurant
+// 2.[Admin] delete restaurant
 module.exports.deleteRestaurant = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   let restaurant = await Restaurant.findById(restaurantId);
@@ -35,7 +35,7 @@ module.exports.deleteRestaurant = catchAsync(async (req, res, next) => {
 });
 
 
-// [Admin] delete multiple restaurants
+// 3. [Admin] delete multiple restaurants
 module.exports.deleteMultipleRestaurants = catchAsync(async (req, res, next) => {
   let restaurantIds = req.body.ids;
   if (!restaurantIds || restaurantIds.length === 0) {
@@ -58,7 +58,7 @@ module.exports.deleteMultipleRestaurants = catchAsync(async (req, res, next) => 
 });
 
 
-// [Admin] approve/reject multiple restaurants (patch request)
+// 4. [Admin] approve/reject multiple restaurants (patch request)
 module.exports.setConfirmStatusMultiple = catchAsync(async (req, res, next) => {
   let restaurantIds = req.body.map(obj => obj.id);
   let confirmStatuses = req.body.map(obj => obj.confirm_status);
@@ -89,7 +89,7 @@ module.exports.setConfirmStatusMultiple = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success" });
 });
 
-// 2. [Admin] approve/reject restaurant (patch request)
+// 5. [Admin] approve/reject restaurant (patch request)
 module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   let restaurant = await Restaurant.findById(restaurantId);
@@ -106,7 +106,7 @@ module.exports.setConfirmStatus = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success" });
 });
 
-// 3. [Admin] Get restaurants requests (get all restaurant documents with the field "confirmStatus" = "none" -- note that this field becomes "true" on approval and "false" on rejection)
+// 6. [Admin] Get restaurants requests (get all restaurant documents with the field "confirmStatus" = "none" -- note that this field becomes "true" on approval and "false" on rejection)
 module.exports.getRestaurantsRequests = catchAsync(async (req, res, next) => {
   let queryManager = new DbQueryManager(Restaurant.find({ confirmStatus: "none" }));
   let restaurants = await queryManager.all(req.query);
@@ -119,7 +119,7 @@ module.exports.getRestaurantsRequests = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", totalSize, restaurants });
 });
 
-// 4. Get specific restaurant info
+// 7. Get specific restaurant info
 module.exports.getRestaurant = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   let restaurant = await Restaurant.findById(restaurantId);
@@ -130,7 +130,7 @@ module.exports.getRestaurant = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", restaurant: restaurant.toPublic() });
 });
 
-// 5. Get menu item
+// 8. Get menu item
 module.exports.getMenuItemOfMe = catchAsync(async (req, res, next) => {
   let restaurantId = req.user._id;
   let menuItemId = req.params.menuItem_id;
@@ -144,7 +144,7 @@ module.exports.getMenuItemOfMe = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", menu_item: menuItem });
 });
 
-// 5. Get menu item
+// 9. Get menu item
 module.exports.getMenuItem = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.restaurant_id;
   let menuItemId = req.params.menuItem_id;
@@ -159,7 +159,7 @@ module.exports.getMenuItem = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", menu_item: menuItem });
 });
 
-// 6. Get menu item
+// 10. Get menu item
 module.exports.getAllMenuItemsOfMe = catchAsync(async (req, res, next) => {
   let restaurantId = req.user._id;
 
@@ -171,7 +171,7 @@ module.exports.getAllMenuItemsOfMe = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", totalSize, menu_items: menuItems });
 });
 
-// 6. Get menu item
+// 11. Get menu item
 module.exports.getAllMenuItems = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   await requireConfirmed(restaurantId);
@@ -184,7 +184,7 @@ module.exports.getAllMenuItems = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", totalSize, menu_items: menuItems });
 });
 
-// 7. Insert menu item
+// 12. Insert menu item
 module.exports.addMenuItem = catchAsync(async (req, res, next) => {
   const { name, image, description, ingredients, availableForSale, price } = req.body;
   let menuItem = new MenuItem({
@@ -200,7 +200,7 @@ module.exports.addMenuItem = catchAsync(async (req, res, next) => {
   res.status(201).json({ status: "created", menu_item: menuItem });
 });
 
-// 8. Update menu item (price / name / description)
+// 13. Update menu item (price / name / description)
 module.exports.updateMenuItem = catchAsync(async (req, res, next) => {
   let menuItemId = req.params.id;
   let restaurantId = req.user._id;
@@ -222,7 +222,7 @@ module.exports.updateMenuItem = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "updated" });
 });
 
-// 9. Delete menu item
+// 14. Delete menu item
 module.exports.deleteMenuItem = catchAsync(async (req, res, next) => {
   let menuItemId = req.params.id;
   let restaurantId = req.user._id;
@@ -239,7 +239,7 @@ module.exports.deleteMenuItem = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "deleted" });
 });
 
-// 10. get incoming orders
+// 15. get incoming orders
 module.exports.getMyIncomingOrders = catchAsync(async (req, res, next) => {
   let delivered = req.query.delivered || false;
   let query = { restaurant: req.user._id, delivered: delivered };
@@ -262,7 +262,7 @@ module.exports.getMyIncomingOrders = catchAsync(async (req, res, next) => {
   });
 });
 
-// 11. Set delivered status for a specific order
+// 16. Set delivered status for a specific order
 module.exports.changeDeliveredStatus = catchAsync(async (req, res, next) => {
   let restaurantId = req.user._id;
   let orderId = req.params.id;
@@ -283,7 +283,7 @@ module.exports.changeDeliveredStatus = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "updated" });
 });
 
-// 12. Get reviews of my restaurant
+// 17. Get reviews of my restaurant
 module.exports.getMyIncomingReviews = catchAsync(async (req, res, next) => {
   let restaurantId = req.user._id;
   let query = { restaurant: restaurantId };
@@ -294,7 +294,7 @@ module.exports.getMyIncomingReviews = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", totalSize, reviews });
 });
 
-// 13. Get reviews of specific restaurant
+// 18. Get reviews of specific restaurant
 module.exports.getRestaurantReviews = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   let query = { restaurant: restaurantId };
@@ -305,7 +305,7 @@ module.exports.getRestaurantReviews = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", totalSize, reviews });
 });
 
-// 14. get all restaurants
+// 19. get all restaurants
 module.exports.getAllRestaurants = catchAsync(async (req, res, next) => {
   let query = { confirmStatus: "true" };
   let queryManager = new DbQueryManager(Restaurant.find(query));
