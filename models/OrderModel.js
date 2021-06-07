@@ -50,6 +50,13 @@ const orderSchema = new mongoose.Schema(
 	}
 );
 
+// Update Date before saving document
+orderSchema.pre('save', function(next) {
+	this.date = Date.now();
+	next();
+});
+
+
 //Plugins:-
 //-----------------------------------------------------------------
 orderSchema.plugin(idValidator, {
@@ -77,7 +84,9 @@ orderSchema.methods.toPublic = function () {
 		}
 	});
 
-	publicOrder.user = new User(publicOrder.user).toPublic();
+	try {
+		publicOrder.user = new User(publicOrder.user).toPublic();
+	} catch (e) {}
 	return publicOrder;
 };
 const Order = mongoose.model("Order", orderSchema);
