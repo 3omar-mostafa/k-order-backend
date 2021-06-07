@@ -56,6 +56,11 @@ module.exports.addOrder = catchAsync(async (req, res, next) => {
   let menuItemIds = req.body.map(obj => obj.menuItem);
   let menuItems = await MenuItem.find({ '_id': { $in: menuItemIds }, availableForSale: true });
 
+  console.log(quantities);
+  if (menuItems.length === 0 || quantities.length !== menuItems.length) {
+    throw new AppError("Invalid Menu Items", 400);
+  }
+
   let restaurantIds = new Set();
   for (let menuItem of menuItems) {
     restaurantIds.add(menuItem.restaurant.toString());
