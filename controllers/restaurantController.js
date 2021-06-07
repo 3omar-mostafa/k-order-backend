@@ -247,7 +247,7 @@ module.exports.getMyIncomingOrders = catchAsync(async (req, res, next) => {
     query = { restaurant: req.user._id };
   }
   delete req.query.delivered;
-  const ordersQueryManager = new DbQueryManager(Order.find(query).populate('menuItems.menuItem'));
+  const ordersQueryManager = new DbQueryManager(Order.find(query).populate('menuItems.menuItem').populate('user'));
   let myOrders = await ordersQueryManager.all(req.query);
   const totalSize = await ordersQueryManager.totalCount(req.query, Order, query);
 

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const idValidator = require("mongoose-id-validator");
 const validator = require("validator");
 
+const User = require("./UserModel");
 
 const orderSchema = new mongoose.Schema(
 	{
@@ -75,6 +76,8 @@ orderSchema.methods.toPublic = function () {
 			delete publicOrder[el];
 		}
 	});
+
+	publicOrder.user = new User(publicOrder.user).toPublic();
 	return publicOrder;
 };
 const Order = mongoose.model("Order", orderSchema);
