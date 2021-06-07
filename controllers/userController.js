@@ -54,7 +54,7 @@ module.exports.addOrder = catchAsync(async (req, res, next) => {
   let userId = req.user._id;
   let quantities = req.body.map(obj => obj.quantity);
   let menuItemIds = req.body.map(obj => obj.menuItem);
-  let menuItems = await MenuItem.find({ '_id': { $in: menuItemIds } });
+  let menuItems = await MenuItem.find({ '_id': { $in: menuItemIds }, availableForSale: true });
 
   let restaurantIds = new Set();
   for (let menuItem of menuItems) {
@@ -86,7 +86,7 @@ module.exports.addOrder = catchAsync(async (req, res, next) => {
   order.menuItems = quantities.map(function (q, i) {
     return { quantity: q, menuItem: menuItems[i] }
   });
-  
+
   res.status(201).json({ status: "created", order: order.toPublic() });
 });
 

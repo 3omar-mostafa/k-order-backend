@@ -131,11 +131,10 @@ module.exports.getRestaurant = catchAsync(async (req, res, next) => {
 });
 
 // 5. Get menu item
-module.exports.getMenuItem = catchAsync(async (req, res, next) => {
-  let restaurantId = req.params.restaurant_id;
+module.exports.getMenuItemOfMe = catchAsync(async (req, res, next) => {
+  let restaurantId = req.user._id;
   let menuItemId = req.params.menuItem_id;
 
-  await requireConfirmed(restaurantId);
   let menuItem = await MenuItem.findOne({ _id: menuItemId, restaurant: restaurantId });
 
   if (!menuItem) {
@@ -145,14 +144,43 @@ module.exports.getMenuItem = catchAsync(async (req, res, next) => {
   res.status(200).json({ status: "success", menu_item: menuItem });
 });
 
+// 5. Get menu item
+module.exports.getMenuItem = catchAsync(async (req, res, next) => {
+  let restaurantId = req.params.restaurant_id;
+  let menuItemId = req.params.menuItem_id;
+
+  await requireConfirmed(restaurantId);
+  let menuItem = await MenuItem.findOne({ _id: menuItemId, restaurant: restaurantId, availableForSale: true });
+
+  if (!menuItem) {
+    throw new AppError("Not Found", 404);
+  }
+
+  res.status(200).json({ status: "success", menu_item: menuItem });
+});
+
+// 6. Get menu item
+module.exports.getAllMenuItemsOfMe = catchAsync(async (req, res, next) => {
+  let restaurantId = req.user._id;
+
+  let queryManager = new DbQueryManager(MenuItem.find({ restaurant: restaurantId }));
+  let menuItems = await queryManager.all(req.query);
+  const totalSize = await queryManager.totalCount(req.query, MenuItem, { restaurant: restaurantId });
+
+  res.status(200).json({ status: "success", totalSize, menu_items: menuItems });
+});
+
 // 6. Get menu item
 module.exports.getAllMenuItems = catchAsync(async (req, res, next) => {
   let restaurantId = req.params.id;
   await requireConfirmed(restaurantId);
 
-  let queryManager = new DbQueryManager(MenuItem.find({ restaurant: restaurantId }));
+  let queryManager = new DbQueryManager(MenuItem.find({ restaurant: restaurantId, availableForSale: true }));
   let menuItems = await queryManager.all(req.query);
-  const totalSize = await queryManager.totalCount(req.query, MenuItem, { restaurant: restaurantId });
+  const totalSize = await queryManager.totalCount(req.query, MenuItem, {
+    restaurant: restaurantId,
+    availableForSale: true
+  });
 
   res.status(200).json({ status: "success", totalSize, menu_items: menuItems });
 });

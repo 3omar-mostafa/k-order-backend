@@ -38,15 +38,6 @@ const productSchema = new mongoose.Schema(
 	}
 );
 
-productSchema.pre(/^find/, function (next) {
-	this.find({
-		availableForSale: {
-			$ne: false,
-		},
-	});
-	next();
-});
-
 productSchema.pre("count", function (next) {
 	this.find({
 		deleted: {

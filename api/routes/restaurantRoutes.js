@@ -56,8 +56,20 @@ router.get(
 // 4. Get specific restaurant info
 router.get("/:id", restaurantController.getRestaurant);
 
+// 5. Get a specific menu item of a me
+router.get("/me/menu-items/:menuItem_id",
+  authenticationController.protect(),
+  authenticationController.restrictTo("Restaurant"),
+  restaurantController.getMenuItemOfMe);
+
 // 5. Get a specific menu item of a specific restaurant
 router.get("/:restaurant_id/menu-items/:menuItem_id", restaurantController.getMenuItem);
+
+// 6. Get all menu items of a me
+router.get("/me/menu-items/",
+  authenticationController.protect(),
+  authenticationController.restrictTo("Restaurant"),
+  restaurantController.getAllMenuItemsOfMe);
 
 // 6. Get all menu items of a specific restaurant
 router.get("/:id/menu-items/", restaurantController.getAllMenuItems);
