@@ -241,7 +241,12 @@ module.exports.deleteMenuItem = catchAsync(async (req, res, next) => {
 
 // 10. get incoming orders
 module.exports.getMyIncomingOrders = catchAsync(async (req, res, next) => {
-  let query = { restaurant: req.user._id };
+  let delivered = req.query.delivered || false;
+  let query = { restaurant: req.user._id, delivered: delivered };
+  if (String(req.query.delivered) === "all") {
+    query = { restaurant: req.user._id };
+  }
+  delete req.query.delivered;
   const ordersQueryManager = new DbQueryManager(Order.find(query).populate('menuItems.menuItem'));
   let myOrders = await ordersQueryManager.all(req.query);
   const totalSize = await ordersQueryManager.totalCount(req.query, Order, query);
