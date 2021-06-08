@@ -1,6 +1,8 @@
 # k-order-backend
 An API for a food ordering app.
 
+# You can view the Websie at [heroku](https://korder.herokuapp.com/)
+
 # To start the app locally on your machine:
 - You need node.js and mongoDB to be installed locally on your pc
 - Run `npm install`
