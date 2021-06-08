@@ -87,4 +87,4 @@ config.env
 
 /config/jwt-keys
 
-/frontend
+/frontend/dist
